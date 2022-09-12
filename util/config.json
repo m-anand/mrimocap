@@ -1,0 +1,7 @@
+{
+"data":"Y:\\OneDrive\\R01_Biomechanics",
+"subject_list_file":"subjects.xlsx",
+"results_folder":"results",
+"strFNTemplate":"R01_MRI_V3DModel.mdh",
+"tasks_file":".\\util\\tasks_file.txt"
+}
