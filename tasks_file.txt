@@ -1,0 +1,9 @@
+Task	Side
+Static_1	LR
+CKC_L	L
+CKC_R	R
+CKC_BL_1	LR
+CKC_BL_2	LR
+CKC_BL_3	LR
+OKC_L	L
+OKC_R	L
