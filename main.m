@@ -5,6 +5,7 @@
 clc; clear;
 close all;
 set(0,'DefaultFigureWindowStyle','docked');
+timestamp = datestr(now, '_YYDDmm_HHMM');
 curdir = pwd;
 verbose = 1;  % prints output plots
 % load the config file
@@ -18,7 +19,7 @@ strFNTemplate = fullfile(curdir,config.strFNTemplate);
 % load tasks
 tasks_read = readtable(config.tasks_file);
 tasks_name = tasks_read.Task;
-tasks = append(tasks_name,'.c3d');
+tasks = append(tasks_name);
 
 % static file name loaded as the first task in the task list
 strFNModelC3D = tasks{1};
@@ -52,13 +53,14 @@ in = 1;
 tab = readtable(config.subject_list_file);
 for i = 1:length(tab.subjectID)
     subject = tab.subjectID{i};
-    search_subject_dir = glob(fullfile(data_folder,append(subject,'*')));
-    subject_dir = search_subject_dir{1};
+    search_subject_dir = dir(fullfile(data_folder,append(subject,'*')));
+%     subject_dir = search_subject_dir{1};
+    subject_dir = fullfile(search_subject_dir.folder,search_subject_dir.name);
 
-    if exist(subject_dir,'dir')
+    if search_subject_dir.isdir == 1
         disp(sprintf('Subject :  %s',subject));
-        task_path = fullfile(subject_dir,task);
-        strFNMotionC3D = task;
+        task_path = fullfile(subject_dir,task_c3d);
+        strFNMotionC3D = task_c3d;
 
         if exist(task_path)==2
 
@@ -100,7 +102,9 @@ for i = 1:length(tab.subjectID)
                     output.Cycles = [output.Cycles;outcomes.Cycles];
                     output.mean_rom = [output.mean_rom;mean(outcomes.rom)];
                 end
-
+            data.subject = subject;
+            data.outcomes = outcomes;
+            data.path = result_file;
 
             end
 
@@ -109,11 +113,13 @@ for i = 1:length(tab.subjectID)
 
         end
     end
+    taskData.(append(subject,'_',task))=data;
 end
 % end
-timestamp = datestr(now, '_YYDDmm_HHMM');
 outfile = fullfile(config.results_folder,append(erase(task,".c3d"),timestamp,'.xlsx'));
-if mode ==2 || mode == 3
+taskDataFile = fullfile(config.results_folder,append(erase(task,".c3d"),timestamp,'.mat'));
+
+if mode ==2 || mode ==  3
     %     T = table();
     %     T.id = output.Name;
     %     T = table( output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), 'VariableNames', {'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse'});
@@ -124,9 +130,10 @@ if mode ==2 || mode == 3
             'VariableNames', outcomes.header);
     else
         T = table(output.Name, output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), ...
-            'VariableNames', outcomes.header);
+            'VariableNames', outcomes.header(1:5));
     end
-        writetable(T,outfile)
+        writetable(T,outfile);
+    save(taskDataFile, "taskData");
 end
 %%
 % read the configuration .json file for the program and parse data
