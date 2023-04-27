@@ -22,7 +22,7 @@ tasks_name = tasks_read.Task;
 tasks = append(tasks_name);
 
 % static file name loaded as the first task in the task list
-strFNModelC3D = tasks{1};
+strFNModelC3D = append(tasks{1},'.c3d');
 
 %% Get user inputs for which task and mode
 [task, x] = get_task(tasks);
@@ -54,7 +54,7 @@ tab = readtable(config.subject_list_file);
 for i = 1:length(tab.subjectID)
     subject = tab.subjectID{i};
     search_subject_dir = dir(fullfile(data_folder,append(subject,'*')));
-%     subject_dir = search_subject_dir{1};
+    %     subject_dir = search_subject_dir{1};
     subject_dir = fullfile(search_subject_dir.folder,search_subject_dir.name);
 
     if search_subject_dir.isdir == 1
@@ -102,18 +102,16 @@ for i = 1:length(tab.subjectID)
                     output.Cycles = [output.Cycles;outcomes.Cycles];
                     output.mean_rom = [output.mean_rom;mean(outcomes.rom)];
                 end
-            data.subject = subject;
-            data.outcomes = outcomes;
-            data.path = result_file;
-
+                data.subject = subject;
+                data.outcomes = outcomes;
+                data.path = result_file;
+                taskData.(append(subject,'_',task))=data;
             end
-
             in = in+1;
             disp("Analysis complete");
-
         end
+
     end
-    taskData.(append(subject,'_',task))=data;
 end
 % end
 outfile = fullfile(config.results_folder,append(erase(task,".c3d"),timestamp,'.xlsx'));
@@ -132,7 +130,7 @@ if mode ==2 || mode ==  3
         T = table(output.Name, output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), ...
             'VariableNames', outcomes.header(1:5));
     end
-        writetable(T,outfile);
+    writetable(T,outfile);
     save(taskDataFile, "taskData");
 end
 %%

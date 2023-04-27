@@ -19,9 +19,15 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
             case 'LR'
                 V = {S.LT_KNEE_ANGLE{1,1}
                     S.RT_KNEE_ANGLE{1,1}};
-                header = {'ID', 'L_Cycles','L_ROM_sagittal','L_ROM_frontal','L_ROM_transverse', ...
-                    'R_Cycles','R_ROM_sagittal','R_ROM_frontal','R_ROM_transverse'};
-                outcomes = struct('L_Cycles',[],'L_rom',[],'R_Cycles',[],'R_rom',[], 'header', [], index = loop);
+                header = {
+                        'ID', 'L_Cycles','L_ROM_sagittal','L_ROM_frontal','L_ROM_transverse', ...                         'L_max_sagittal','L_max_frontal','L_max_transverse',...                        'L_min_sagittal','L_min_frontal','L_min_transverse',...
+                        'R_Cycles','R_ROM_sagittal','R_ROM_frontal','R_ROM_transverse'};
+%                         'R_max_sagittal','R_max_frontal','R_max_transverse',...
+%                         'R_min_sagittal','R_min_frontal','R_min_transverse'
+%                         };
+                outcomes = struct('L_Cycles',[],'L_rom',[],'L_max', [], 'L_min', [],'L_std_dev',[],...
+                                    'R_Cycles',[],'R_rom',[], 'R_max', [], 'R_min', [],'R_std_dev',[],...
+                                    'header', [], index = loop);
         end
     if verbose
         figure;
@@ -29,7 +35,8 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
     end
 
     for k=1:loop
-
+        k
+        n
         v = V{k};
         l = 1:length(v);
         
@@ -52,13 +59,14 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
            for j = bl_in(2*i-1):bl_in(2*i)-1
                var = -v(lcs(j):lcs(j+1),:);
                var_tmp=[var_tmp;var];
-               outcomes.(fns{n*k-n+2}) = [outcomes.(fns{n*k-n+2}); max(var)-min(var)];
-               outcomes.(fns{n*k-n+3}) = [outcomes.(fns{n*k-n+3}); max(var)];
-               outcomes.(fns{n*k-n+4}) = [outcomes.(fns{n*k-n+4}); min(var)];
+               kk = (k-1);
+               outcomes.(fns{5*kk+2}) = [outcomes.(fns{5*kk+2}); max(var)-min(var)];
+               outcomes.(fns{5*kk+3}) = [outcomes.(fns{5*kk+3}); max(var)];
+               outcomes.(fns{5*kk+4}) = [outcomes.(fns{5*kk+4}); min(var)];
            end   
         end
-        outcomes.(fns{2*k-1}) = length(pks);
-        outcomes.std_dev = std(var_tmp);
+        outcomes.(fns{5*kk+1}) = length(pks);
+        outcomes.(fns{5*kk+5}) = std(var_tmp);
         if verbose
                
                 subplot(loop,1,k); hold on;
