@@ -3,9 +3,10 @@
 function outcomes = find_cycles(S,subject, task, side, verbose)
 % initialize
         loop = numel(side);
-        header = {'ID', 'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse',...
-            'max_sagittal','max_frontal','max_transverse',...
-            'min_sagittal','min_frontal','min_transverse','Cycles'};
+%         header = {'ID', 'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse',...
+%             'max_sagittal','max_frontal','max_transverse',...
+%             'min_sagittal','min_frontal','min_transverse','Standard_Deviation'};
+        header = {'ID', 'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse','Standard_Deviation'};
 %         outcomes = struct('Cycles',[],'rom',[], 'header', [], index = loop);
         outcomes = struct('Cycles',[],'rom',[], 'max', [], 'min', [],'std_dev',[], 'header', [], index = loop); 
         n=4;
@@ -20,8 +21,8 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
                 V = {S.LT_KNEE_ANGLE{1,1}
                     S.RT_KNEE_ANGLE{1,1}};
                 header = {
-                        'ID', 'L_Cycles','L_ROM_sagittal','L_ROM_frontal','L_ROM_transverse', ...                         'L_max_sagittal','L_max_frontal','L_max_transverse',...                        'L_min_sagittal','L_min_frontal','L_min_transverse',...
-                        'R_Cycles','R_ROM_sagittal','R_ROM_frontal','R_ROM_transverse'};
+                        'ID', 'L_Cycles','L_ROM_sagittal','L_ROM_frontal','L_ROM_transverse','R_Standard_Deviation' ...                         'L_max_sagittal','L_max_frontal','L_max_transverse',...                        'L_min_sagittal','L_min_frontal','L_min_transverse',...
+                        'R_Cycles','R_ROM_sagittal','R_ROM_frontal','R_ROM_transverse','L_Standard_Deviation','Coordination'};
 %                         'R_max_sagittal','R_max_frontal','R_max_transverse',...
 %                         'R_min_sagittal','R_min_frontal','R_min_transverse'
 %                         };
@@ -35,8 +36,6 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
     end
 
     for k=1:loop
-        k
-        n
         v = V{k};
         l = 1:length(v);
         
@@ -57,9 +56,10 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
         var_tmp=[]; % variable to hold the concatenated timeseries of the movement blocks
         for i=1:4
            for j = bl_in(2*i-1):bl_in(2*i)-1
-               var = -v(lcs(j):lcs(j+1),:);
+               var = -v(lcs(j):lcs(j+1),:);         % difference between the respective metric's peaks
                var_tmp=[var_tmp;var];
                kk = (k-1);
+               
                outcomes.(fns{5*kk+2}) = [outcomes.(fns{5*kk+2}); max(var)-min(var)];
                outcomes.(fns{5*kk+3}) = [outcomes.(fns{5*kk+3}); max(var)];
                outcomes.(fns{5*kk+4}) = [outcomes.(fns{5*kk+4}); min(var)];
@@ -77,7 +77,15 @@ function outcomes = find_cycles(S,subject, task, side, verbose)
         %     plot(lcs(fd),pks(fd),'blacks')
                 plot(bl,-v(bl),'blacks')            % plotthe start and end of the block
             
-        end    
+        end
+        tmp_lcs(:,k) =lcs;
     end
     outcomes.header = header;
+    t_diff = diff(tmp_lcs);
+    t_diff(t_diff(:,1)>1000,:) = [];
+    if loop>1
+        outcomes.t_lcs = tmp_lcs;
+        COR = corrcoef(t_diff);
+        outcomes.correlation = COR(2,1);
+    end
 end

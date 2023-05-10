@@ -41,9 +41,9 @@ switch mode
         overwrite = input(prompt2,"s");
 end
 task_c3d = append(task,'.c3d');
-output = struct('Name',[],'Cycles',[],'mean_rom',[]);
+output = struct('Name',[],'Cycles',[],'mean_rom',[],'std_dev',[]);
 if numel(tasks_read.Side{x}) == 2
-    output = struct('Name',[],'L_Cycles',[],'L_mean_rom',[],'R_Cycles',[],'R_mean_rom',[]);
+    output = struct('Name',[],'L_Cycles',[],'L_mean_rom',[],'L_std_dev',[],'R_Cycles',[],'R_mean_rom',[],'R_std_dev',[],'coordination',[]);
 
 
 end
@@ -95,11 +95,19 @@ for i = 1:length(tab.subjectID)
                 if ind == 2
                     output.L_Cycles = [output.L_Cycles;outcomes.L_Cycles];
                     output.R_Cycles = [output.R_Cycles;outcomes.R_Cycles];
+                    
 
                     output.L_mean_rom = [output.L_mean_rom;mean(outcomes.L_rom)];
                     output.R_mean_rom = [output.R_mean_rom;mean(outcomes.R_rom)];
+                    
+                    output.L_std_dev = [output.L_std_dev; outcomes.L_std_dev];
+                    output.R_std_dev = [output.R_std_dev; outcomes.R_std_dev];
+
+                    output.coordination = [output.coordination; outcomes.correlation];
+
                 else
                     output.Cycles = [output.Cycles;outcomes.Cycles];
+                    output.std_dev = [output.std_dev; outcomes.std_dev];
                     output.mean_rom = [output.mean_rom;mean(outcomes.rom)];
                 end
                 data.subject = subject;
@@ -123,11 +131,12 @@ if mode ==2 || mode ==  3
     %     T = table( output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), 'VariableNames', {'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse'});
     %     T = table(output.Name, output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), 'VariableNames', {'ID', 'Cycles','ROM_sagittal','ROM_frontal','ROM_transverse'});
     if ind == 2
-        T = table(output.Name, output.L_Cycles, output.L_mean_rom(:,1), output.L_mean_rom(:,2), output.L_mean_rom(:,3), ...
-            output.R_Cycles, output.R_mean_rom(:,1), output.R_mean_rom(:,2), output.R_mean_rom(:,3),...
+        T = table(output.Name, output.L_Cycles, output.L_mean_rom(:,1), output.L_mean_rom(:,2), output.L_mean_rom(:,3),output.L_std_dev, ...
+            output.R_Cycles, output.R_mean_rom(:,1), output.R_mean_rom(:,2), output.R_mean_rom(:,3),output.R_std_dev,...
+            output.coordination,...
             'VariableNames', outcomes.header);
     else
-        T = table(output.Name, output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), ...
+        T = table(output.Name, output.Cycles, output.mean_rom(:,1), output.mean_rom(:,2), output.mean_rom(:,3), output.std_dev,...
             'VariableNames', outcomes.header(1:5));
     end
     writetable(T,outfile);
